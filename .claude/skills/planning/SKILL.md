@@ -6,6 +6,7 @@ description: |
   Creates TODO.md with implementation steps.
 
   Use when: "create plan", "tech spec", "implementation plan", "planning",
+  "план", "как будем делать", "напиши план", "архитектор",
   "/new-tech-spec", "plan", "decompose"
 ---
 
@@ -20,19 +21,19 @@ Planning transforms an approved user-spec (WHAT) into a tech-spec (HOW). Two aut
 1. Read the approved user-spec from `work/{feature}/user-spec.md`
 2. Verify status is `approved` — if not, redirect to discovery skill
 3. Read relevant project context:
-   - Architecture file — code structure, patterns
-   - CJM file — where this fits in the journey
-   - `src/<project>/core/flows.py` — existing build_*_actions() patterns
-   - `src/<project>/core/texts.py` — existing text patterns
+   - `<PROJECT>-architecture.md` — code structure, patterns
+   - `<PROJECT>-cjm.md` — where this fits in the journey (section relevant to the level)
+   - `src/obrep/core/flows.py` — existing build_*_actions() patterns
+   - `src/obrep/core/texts.py` — existing text patterns
 
 ## Phase 1: Codebase Research
 
 Before writing the plan, understand the existing code:
 
 1. **Find similar features:** Grep for patterns matching the new feature
-   - If adding a new command: look at how existing commands are implemented
-   - If adding parser fields: check `parser.py` for existing extractors
-   - If changing onboarding: check `onboarding.py`
+   - If adding a new command: look at how `/fresh`, `/target`, `/cardcheck` are implemented
+   - If adding parser fields: check `src/obrep/parser.py` for existing extractors
+   - If changing onboarding: check `src/obrep/core/onboarding.py`
 
 2. **Identify files to modify:** List every file that will be touched
    - core/ files (business logic)
@@ -55,20 +56,18 @@ The tech-spec must include:
 4. **Architecture decisions** — key choices and why
 5. **Testing strategy** — unit tests, E2E plan, test data
 6. **Deploy plan** — which stories, what order
-7. **Backfill / Data migration strategy** (if adding column or changing data)
+7. **Backfill / Data migration strategy** (if adding column or changing data) — explicit SQL UPDATE statements, dry-run mode, audit accuracy default
 
-### Backfill strategy guidelines
+### Backfill strategy guidelines (G2-E10-S20 lesson)
 
 If tech-spec adds a column or transforms existing data:
 
-- **Audit accuracy as default** — prefer actual data values over opaque markers (`LEGACY_UNKNOWN`). Opaque markers lose audit info and require iteration.
+- **Audit accuracy as default** — prefer actual data values (e.g. `DEMO`/`PROD`/`SYSTEM_TEST`) over opaque markers (`LEGACY_UNKNOWN`). Opaque markers lose audit info and require iteration.
 - **Justify opaque markers** if used — explain why actual values can't be derived from existing data.
 - **Idempotent script** — re-runnable, matches both new and previously-backfilled states.
 - **Dry-run as default** — `--apply` flag required to write.
 - **PRAGMA prerequisite check** — abort if migration column doesn't exist on target DB.
 - **Document rollback SQL** — in script docstring, reversible to pre-backfill state.
-
-Example from project (G2-E10-S20): initial backfill used opaque `LEGACY_UNKNOWN` marker — user corrected to audit-accurate values. Re-apply on STAGE cost significant time. Lesson: default to actual values.
 
 ### Writing Rules
 
@@ -78,35 +77,18 @@ Example from project (G2-E10-S20): initial backfill used opaque `LEGACY_UNKNOWN`
 - Every claim about the codebase must be **verifiable** (skeptic will check)
 - Every requirement from user-spec must be **traceable** (completeness will check)
 
-## Phase 1.4: Payment / Webhook / LLM checklist
-
-If feature touches **payments**, **webhooks**, or **LLM** — answer these questions in tech-spec.
-Otherwise planning skips a fundamental gap.
-
-### Payment / Webhook
-1. **Idempotency:** what key prevents duplicates? PRIMARY KEY on order_id in payment ledger? Time-window dedup? **Time-window is NOT suitable** for payment gateway retransmits (can come hours later).
-2. **Webhook retransmits:** what happens if gateway sends CONFIRMED 5 times in an hour? Logic must be idempotent at DB level (UNIQUE constraint), not application level.
-3. **Service map:** which service processes the webhook? Should it restart during this deploy? (Deploy-agent service map in `.claude/agents/deploy-agent.md`.)
-4. **Audit journal:** where is the trail "user X tried to buy Y, status Z, time T" stored? If only system journal — data rotates. Need persistent table (e.g. `payment_events`).
-5. **Race conditions:** what if user presses button 2 times in 0.5 sec? (UI lock via edit_message, in-memory lock per user_id, DB-level INSERT with UNIQUE)
-
-### LLM (Claude / GPT / etc)
-1. **Output format:** prompt must forbid `#` headers, `|` tables, `*-/list markers`. Telegram doesn't render these. See style-guide.
-2. **Tone enforcement:** "you" addressing must be in the prompt itself, otherwise model writes formal.
-3. **Length:** `max_tokens` ≥ expected output.
-4. **Cost tracking:** track input/output tokens separately. Opus pricing ≠ Sonnet pricing.
-
 ## Phase 3: Validation Round (up to 3 iterations)
 
 Run two validators **in parallel**:
 
 ### Validator 1: Skeptic Agent
 
+Launch via Agent tool:
 ```
 Agent(
   prompt="Read the tech-spec at work/{feature}/tech-spec.md. For every file path, function name, 
   API endpoint, DB table, and parser field mentioned — verify it actually exists in the codebase 
-  at $PROJECT_DIR. Use Grep and Glob to check. Report findings as 
+  at /root/Automations/Telegram_Bot/obrep_bot/. Use Grep and Glob to check. Report findings as 
   JSON: {status: 'approved'|'changes_required', findings: [{severity, claim, reality, fix}]}",
   subagent_type="general-purpose",
   model="sonnet"
@@ -115,6 +97,7 @@ Agent(
 
 ### Validator 2: Completeness Agent
 
+Launch via Agent tool:
 ```
 Agent(
   prompt="Read user-spec at work/{feature}/user-spec.md and tech-spec at work/{feature}/tech-spec.md.
@@ -136,19 +119,36 @@ For each finding:
 
 After fixes: re-run the validator that found the issue (max 3 rounds total).
 
-## Phase 4: Architect Review
+## Phase 4: Architect Review (dispatched agent — Opus, architect-agent-and-parallel-planning)
 
-Run the architect checklist (from the code rules):
+⛔ **Replaces orchestrator checklist with dedicated architect agent on Opus.**
 
-- [ ] Business logic in core/, not in handlers?
-- [ ] No duplication between TG and MAX and CLI?
-- [ ] No TG/MAX/CLI imports in core/?
-- [ ] `get_db_path()` instead of `DB_PATH`?
-- [ ] All new texts in `core/texts.py`?
-- [ ] Level progression formula respected (if applicable)?
-- [ ] Rule of 5: no more than 5 items in any list?
+```
+Agent(
+  prompt="Validate tech-spec at work/{feature}/tech-spec.md per .claude/agents/architect.md.
+  Checks: 5 code rules + Parallel Execution Plan section (grep file overlap verification) +
+  dependency graph + architecture pattern compliance + risk identification.
+  Read project CLAUDE.md for code rules.
+  Read relevant memory files for architecture patterns.
+  Report verdict APPROVED for development | CHANGES_REQUIRED with action items.",
+  subagent_type="architect",
+  model="opus"
+)
+```
 
-If any check fails → update tech-spec.
+**Processing verdict:**
+- **APPROVED** → proceed to Phase 5 (TODO update)
+- **CHANGES_REQUIRED** → orchestrator addresses each finding:
+  - 5 code rule FAIL → must fix in tech-spec
+  - Parallel Execution Plan missing/incorrect → add or correct
+  - Architecture pattern deviation → justify or revise
+  - Re-run architect after fixes (max 3 rounds total)
+
+**Why agent + Opus:**
+- Architecture decisions benefit from Opus deliberation (vs Sonnet)
+- Independent context catches issues orchestrator might rationalize
+- Validates Parallel Execution Plan via grep — not "trust me, it's parallel"
+- trust-event-recovery lesson: bypass routes were missed because no one verified hook coverage across all parallel pathways
 
 ## Phase 5: Create TODO
 
@@ -171,7 +171,7 @@ Brief: `work/{feature}/user-spec.md`
 1. Show tech-spec summary to user (key decisions, files to modify, risks)
 2. Wait for explicit approval
 3. Set tech-spec status to `approved`
-4. Log: `cd $PROJECT_DIR && uv run python scripts/conv_log.py {EPIC} claude decision "tech-spec approved"`
+4. Log: `cd /root/Automations/Telegram_Bot/obrep_bot && uv run python scripts/conv_log.py {EPIC} claude decision "tech-spec approved"`
 
 ## Phase 7: Create Decisions Log
 
@@ -188,6 +188,25 @@ Create `work/{feature}/decisions.md`:
 - Skeptic: {N} claims checked, {M} issues found and fixed
 - Completeness: {N} requirements traced, {M} gaps found and resolved
 ```
+
+## Phase 1.4: Payment / Webhook / LLM checklist (G2-E9 lesson)
+
+Если фича касается **оплат**, **webhook'ов**, или **LLM** — обязательно ответить в tech-spec на эти вопросы.
+Иначе планирование пропустит фундаментальный недостаток (см. F31→F33→F36 эволюцию, F35-F36 LLM
+formatting bugs).
+
+### Payment / Webhook
+1. **Idempotency:** какой ключ предотвращает дубль? PRIMARY KEY на order_id в payment ledger (как `tbank_orders`)? Time-window dedup? **Time-window не подходит** для T-Bank-style retransmits (могут идти часами).
+2. **Webhook retransmits:** что произойдёт если T-Bank пришлёт CONFIRMED 5 раз за час? Логика должна быть idempotent на уровне БД (UNIQUE constraint), не на уровне приложения.
+3. **Service map:** какой сервис (obrep-qr / obrep-billing) обрабатывает webhook? Должен ли он рестартовать при deploy этой фичи? (Deploy-agent service map в `.claude/agents/deploy-agent.md`.)
+4. **Audit journal:** где хранится trail "user X пытался купить Y, статус Z, время T"? Если использовать только systemd journal — данные ротируются. Нужна persistent table (e.g. `payment_events`).
+5. **Race conditions:** что если user нажимает кнопку 2 раза за 0.5 сек? (UI lock через `edit_message`, in-memory lock per user_id, DB-level INSERT с UNIQUE).
+
+### LLM (Claude / GPT / etc)
+1. **Output format:** prompt должен запретить `#` headers, `|` tables, `*-/list markers`. Telegram их не рендерит. См. `docs/style-guide.md` → "LLM prompt output rules".
+2. **Tone enforcement:** обращение "ты" должно быть в самом prompt'е, иначе модель пишет formal "Вы".
+3. **Length:** `max_tokens` ≥ expected output. Если limit=1200 tokens — реально влезет ~2500 ch RU.
+4. **Cost tracking:** для Opus pricing `$15 in + $75 out per M tokens`, не `$4/M Sonnet`. Хранить input/output отдельно.
 
 ## Rules
 
