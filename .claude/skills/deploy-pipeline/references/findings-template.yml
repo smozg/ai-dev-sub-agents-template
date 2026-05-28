@@ -1,0 +1,16 @@
+# findings.yml — Template
+# Created at Step 0 of deploy pipeline. Updated after every sub-agent step and user test.
+# Gate does NOT pass while any finding has status: open
+
+epic: ""           # e.g. G2-E9
+feature: ""        # e.g. feature-name
+
+findings: []
+# Example entry:
+#  - id: F1
+#    step: 4                 # pipeline step that found this
+#    source: tst-stage       # sub-agent name or "user"
+#    severity: bug           # bug | ux | text | idea
+#    status: open            # open | fixed | wont_fix | deferred
+#    description: ""
+#    fix_applied: null       # what was done to fix it

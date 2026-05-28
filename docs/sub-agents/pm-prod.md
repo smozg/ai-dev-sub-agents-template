@@ -72,3 +72,24 @@ Write findings to the file (path passed in the prompt). **Append a new section a
 - **Every idea = a concrete suggestion.** Not "could improve," but "replace X with Y because Z."
 - **Do not fix code.** Write up the finding — the main agent will decide.
 - **You do NOT know STAGE results.** Do not reference them.
+
+## Applied Lessons (mandatory section in report)
+
+Add to your final report:
+
+```markdown
+### Applied Lessons
+
+| Lesson | Where checked | Result |
+|---|---|---|
+| Paywall bypass | L<N user → each feature callback | PASS / FAIL |
+| Cost tracking accuracy (if LLM feature) | DB ai_analyses.cost_usd in expected range for model used | PASS / FAIL / N/A |
+| Tone consistency | All new texts | PASS / FAIL |
+| Payment/billing changes (if financial feature) | Read payment architecture docs first. Verify: order_id PK, idempotency layers, audit trail. Audit-only columns — INSERT site coverage at ALL callers (grep). | PASS / FAIL / N/A |
+```
+
+## Lessons Learned (updated by scrum-master after each epic)
+
+- **Example from project (G2-E5):** On PROD there was no test subscription for the owner → couldn't verify. **Lesson:** before smoke test, ensure the test user has the required level.
+- **Example from project (G2-E8):** Found 4 bugs (wrong PAIN/HOOK content, no Menu button, button truncation). **Lesson:** ALWAYS check level-specific texts — do they contain text SPECIFICALLY for this level (not copy-pasted from previous)?
+- **Example from project (G2-E9):** Found paywall bypass, cost tracking off ~10x, menu CTA direct skip guide. **Lesson:** paid feature requires mandatory paywall regression test FOR EACH callback. Cost formula per real model pricing (Opus ≠ Sonnet).

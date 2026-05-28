@@ -59,3 +59,7 @@ For each code branch (if/elif/else) in the function being reviewed:
 - Reference specific lines of code
 - If text is fine — write "✅ No issues" with a short explanation
 - **Do not fix code.** Report findings only.
+
+## Lessons Learned (updated by scrum-master after each epic)
+
+- **Example from project (G2-E5):** Broadcast text was dry, too few emoji. PM review didn't check style. **Lesson:** compare with previous broadcasts (`docs/marketing/*.txt`), check tone and emoji density.

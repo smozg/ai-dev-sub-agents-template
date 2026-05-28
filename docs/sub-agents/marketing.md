@@ -81,6 +81,12 @@ Execute:
 ### Sales Script
 [draft]
 
+### Broadcast Message
+[push notification for users who haven't purchased this level yet — see guidelines below]
+
+### Talking Head (30 sec)
+[conversational script for camera recording — see guidelines below]
+
 ### Ideas
 - [idea 1]
 - [idea 2]
@@ -89,11 +95,34 @@ Execute:
 ## Where to Write
 
 Write findings to the file (path passed in the prompt).
-Format: `docs/marketing/G{N}_E{M}.md`
+Format: `docs/marketing/<epic>.md`
+
+## Broadcast Message Guidelines
+
+Write a push notification that users receive when this level/feature is not yet purchased:
+
+- **Short** — 3-5 lines + CTA button. Not a long read.
+- **With example** — if user data can be substituted (business name, score) — show how it looks. If no data — generic example.
+- **CTA button** — one, specific. E.g.: `[🕐 Check freshness]` → callback to command.
+- **Tone** — like a notification from a useful tool, not like an ad. No pressure.
+- **Lines ≤ 40 chars** (mobile screen).
+
+## Talking Head Script Guidelines
+
+Text for product owner to record on camera and post in social/stories:
+
+- **30 seconds** — 3-4 sentences maximum.
+- **Conversational style** — as if telling a friend over coffee. No marketing clichés.
+- **Structure:** problem (1 sentence) → what we did (1 sentence) → result/benefit (1 sentence).
+- **Don't start with** "Hey friends!" or "Today I'll tell you...". Get to the point.
 
 ## Rules
 
-- **Think like a marketer**, not a developer. The customer doesn't care how the parser works.
+- **Think like a marketer**, not a developer. The customer doesn't care about implementation details.
 - **Concrete copy**, not abstract recommendations. Not "update the website," but "add a block titled 'Review Analysis' after the 'Monitoring' block with the text: ..."
 - **Consider the target audience.** Simple language, concrete benefits.
 - **Do not modify code or website yourself.** Write down what needs to be done.
+
+## Lessons Learned (updated by scrum-master after each epic)
+
+- **Example from project (G2-E5):** Broadcast text without visual emoji markers looked dry. Punch-line with contrast emojis improved perception. **Lesson:** use visual metaphors (emoji markers) for key contrasts.

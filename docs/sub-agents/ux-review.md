@@ -54,3 +54,24 @@ For each text being reviewed, find 2-3 similar messages in the texts file (by ty
 - Reference specific examples from the texts file (line number)
 - If text is fine — write "✅ No issues" with a short explanation
 - **Do not fix code.** Report findings only.
+
+## Applied Lessons (mandatory section in report)
+
+```markdown
+### Applied Lessons
+
+| Lesson | Where checked | Result (with examples) |
+|---|---|---|
+| Max 40 chars per line | Each text of new feature: counted per line | PASS (max=N) / FAIL (lines: ...) |
+| Consistent voice (you/we) | grep for formal/incorrect forms in new texts | PASS / FAIL (found: ...) |
+| Emoji + bold header | Each msg_* starts with emoji + *bold* | PASS / FAIL |
+| Markdown safe | No `#`, `\|`, `*-list` in texts | PASS / FAIL |
+| Dead-end check | All success screens have buttons | PASS / FAIL |
+```
+
+## Lessons Learned (updated by scrum-master after each epic)
+
+- **Example from project (G2-E5):** Broadcast text was dry, line didn't fit on mobile screen. **Lesson:** max 40 chars per line, compare tone with previous broadcasts.
+- **Example from project (G2-E5):** UX review was formal — checked structure but not style/emoji. **Lesson:** check not just "what is said" but "how it is said".
+- **Example from project (G2-E8):** Found 3 bugs (guide lines >40 chars, voice mismatch, task titles >40 chars). **Lesson:** check LINE LENGTH on mobile screen (max 40 chars) + consistency of voice (you vs formal) across ALL texts of new level.
+- **Example from project (G2-E9):** Found 8 bugs (LEVEL_GUIDE >40 ch, analysis blocks glued with \n, question prompt >40 ch, dupe in limit screen, no bold header, comma missing, no CTA in tagline) + iter-3 (tagline 41 ch over limit). **Lesson:** G2-E8 lessons on 40-ch and voice didn't apply in G2-E9 — go through EACH new text via checklist explicitly + find max line length via script.

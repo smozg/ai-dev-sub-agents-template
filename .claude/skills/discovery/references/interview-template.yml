@@ -1,0 +1,188 @@
+# Interview Template for Feature Discovery
+#
+# Tracks progress of 3-cycle adaptive interview.
+# Updated after EACH user response with scoring, values, and remaining gaps.
+#
+# Scoring: 0-100% (how well we understand this aspect)
+# Status: pending → partial → complete
+# Required: true = must reach 85%, false = cover if relevant
+#
+# USAGE:
+# 1. Copy this template to work/{feature}/interview.yml
+# 2. After user's free-form description, score ALL items
+#    Detailed → 80-95%, Brief → 50-70%, Vague → 20-40%, Not mentioned → 0%
+# 3. Interview loop (save after EVERY response):
+#    a) Find required items with score < 85% in current cycle scope
+#    b) Ask 3-4 questions about different gaps (batch, not one-by-one)
+#    c) Propose solutions based on project knowledge, not just ask
+#    d) User answers
+#    e) Update: scores, values, gaps, conversation_history
+#    f) Check stop criteria
+#    g) Not done → repeat. Done → next cycle.
+# 4. Cycles: cycle1 → cycle2 → cycle3 (cleanup)
+# 5. Resume: if status is "in_progress", load and resume from current state
+
+# ============================================================================
+# Interview Metadata (Session Recovery)
+# ============================================================================
+interview_metadata:
+  feature_name: ""
+  epic: ""                    # G{n}-E{m} format
+  started: ""                 # YYYY-MM-DD HH:MM
+  last_updated: ""
+  status: "not_started"       # not_started | in_progress | completed
+  current_cycle: 1            # 1, 2, or 3
+  questions_asked: 0
+
+# ============================================================================
+# Conversation History (for session recovery after compact)
+# ============================================================================
+conversation_history: []
+# Format:
+# - question_num: 1
+#   cycle: 1
+#   topic: "pain"
+#   question: "What pain does the user have?"
+#   answer: "User doesn't understand where to grow..."
+#   scores_updated: ["pain: 0→75", "success_metric: 0→40"]
+
+# ============================================================================
+# Cycle 1: Business
+# ============================================================================
+# Why are we building this? Who benefits? How do we measure success?
+cycle1_business:
+
+  feature_name:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "Name not discussed yet"
+    required: true
+
+  pain:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "What specific pain does this solve for the client?"
+    required: true
+
+  success_metric:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "How do we measure that this feature works? Concrete metric."
+    required: true
+
+  what_if_not:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "What happens if we don't build this? What do users lose?"
+    required: true
+
+  target_users:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "Who specifically uses this? All users? Certain level? Certain type?"
+    required: false
+
+# ============================================================================
+# Cycle 2: UX + CJM (User Experience)
+# ============================================================================
+# How does the user interact with this? Where does it fit in the journey?
+cycle2_ux_cjm:
+
+  cjm_step:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "Which step of the CJM changes? What level? Before/after what action?"
+    required: true
+
+  affected_screens:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "Which screens/messages are affected? New command? Existing flow?"
+    required: true
+
+  user_scenarios:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "Step-by-step: user does X → sees Y → presses Z → gets W"
+    required: true
+
+  edge_cases:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "What if no data? What if competitor has no reviews? What if user already has this?"
+    required: true
+
+# ============================================================================
+# Cycle 3: Technical
+# ============================================================================
+# What data do we need? What can break? What depends on what?
+cycle3_technical:
+
+  data_source:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "Where does data come from? Parser? DB? API? New fields needed?"
+    required: true
+
+  dependencies:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "Which existing features/levels/parser fields does this depend on?"
+    required: false
+
+  risks:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "What can break? External API changes? Performance? Data missing?"
+    required: true
+
+  frontend_sync:
+    score: 0
+    status: "pending"
+    value: ""
+    gaps: "Any platform-specific differences? Or identical across TG/MAX/CLI?"
+    required: false
+
+# ============================================================================
+# Decision Rules
+# ============================================================================
+decision_rules:
+  required_threshold: 85
+  optional_threshold: 50
+
+  # Stop criteria for each cycle (BOTH must be true):
+  stop_criteria:
+    - "All required items in current cycle score >= 85%"
+    - "Every required item has non-empty value and resolved gaps"
+
+  question_strategy:
+    - "3-4 questions per batch about different gaps"
+    - "Propose solutions based on project knowledge, not just ask"
+    - "Challenge: counterexamples, edge cases, unexplored scenarios"
+    - "After each response: update scores, values, gaps immediately"
+    - "If user gives brief answer (1 sentence): score 50-70%, ask follow-up"
+    - "If user gives detailed answer (3+ sentences): score 80-95%"
+
+# ============================================================================
+# Progress Summary
+# ============================================================================
+progress:
+  cycle1_complete: false
+  cycle2_complete: false
+  cycle3_complete: false
+  total_required_fields: 9
+  fields_above_threshold: 0
+  completion_estimate: "0%"
+  user_detail_level: "unknown"  # brief | moderate | detailed

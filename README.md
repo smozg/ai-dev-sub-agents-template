@@ -1,143 +1,217 @@
 # AI Dev Sub-Agents Template
 
-Template sub-agent prompts for use with **Claude Code Agent tool**. Each sub-agent is a specialized role that runs independently during the development lifecycle.
+A complete Claude Code workflow system for production-quality software development. Battle-tested on a real Telegram bot product across 10+ epics and 6+ months of continuous development.
 
-## Sub-Agents
+This template provides 7 specialized sub-agents, 8 workflow skills, 7 slash commands, and a 19-step deploy + GTM pipeline — all ready to adapt to any project.
 
-| Agent | File | Model | When | Purpose |
-|-------|------|-------|------|---------|
-| **Tester (STAGE)** | `tst-stage.md` | Sonnet | After deploy to STAGE | E2E testing via CLI, DB verification |
-| **Tester (PROD)** | `tst-prod.md` | Sonnet | After deploy to PROD | Same checks on production |
-| **PM Reviewer (STAGE)** | `pm-stage.md` | Opus | After STAGE tests pass | CJM review, text/UX quality, ideas |
-| **PM Reviewer (PROD)** | `pm-prod.md` | Opus | After PROD tests pass | Final CJM pass on production |
-| **PM Reviewer (Broadcast)** | `pm-review.md` | Opus | Before broadcast/notification | Copy quality, all scenarios, tone |
-| **UX Reviewer (Broadcast)** | `ux-review.md` | Opus | Before broadcast/notification | Style guide compliance, visual consistency |
-| **Site Verifier** | `tst-site.md` | Sonnet | After site update (S5b) | Bundle verification, regression check |
-| **Marketing** | `marketing.md` | Opus | Start & end of each epic | Positioning, sales scripts, site updates |
-
-## Deploy Flow
+## What's Included
 
 ```
-Code ready → Deploy to STAGE
-  → Agent: tst-stage.md (E2E test)
-  → Agent: pm-stage.md (UX review)
-  → User: smoke test
-Deploy to PROD
-  → Agent: tst-prod.md (E2E test)
-  → Agent: pm-prod.md (UX review)
-  → User: smoke test
+.claude/
+├── agents/                     # 7 specialized sub-agents
+│   ├── code-reviewer.md        # Architecture + sync + security review (Sonnet)
+│   ├── completeness-validator.md # User-spec ↔ tech-spec traceability (Sonnet)
+│   ├── deploy-agent.md         # scp + pycache + restart + verify (Sonnet)
+│   ├── financial-reviewer.md   # Payment/billing/audit review (Opus)
+│   ├── scrum-master-agent.md   # Post-epic retrospective (Opus)
+│   ├── skeptic.md              # Plan hallucination catcher (Sonnet)
+│   └── webdevops.md            # Website deploy + live verify (Sonnet)
+├── skills/                     # 8 workflow skills (loaded by Claude on demand)
+│   ├── code-reviewing/SKILL.md + ...
+│   ├── deploy-pipeline/SKILL.md + references/
+│   ├── development/SKILL.md + references/
+│   ├── discovery/SKILL.md + references/
+│   ├── marketing/SKILL.md + references/
+│   ├── planning/SKILL.md + references/
+│   ├── project-knowledge/SKILL.md + references/
+│   └── scrum-master/SKILL.md + references/
+└── commands/                   # 7 slash commands
+    ├── /new-feature            # Discovery → Planning pipeline
+    ├── /deploy                 # 19-step Deploy + GTM pipeline
+    ├── /done                   # Retrospective + archive
+    ├── /write-code             # Quick code task (bug fix, small feature)
+    ├── /broadcast              # Marketing broadcast (3-gate + 3-step)
+    ├── /scrum-master-weekly    # Weekly process retrospective
+    └── /scrum-master-monthly   # Monthly process retrospective
+docs/
+├── playbooks/
+│   └── trust-event-recovery.md # When Claude misrepresents a capability
+└── sub-agents/                 # 8 prompt-ready sub-agent instructions
+    ├── tst-stage.md / tst-prod.md / tst-site.md (deprecated → webdevops)
+    ├── pm-stage.md / pm-prod.md / pm-review.md
+    ├── ux-review.md
+    └── marketing.md
 ```
 
-## S5 Marketing Story Flow
+## The Deploy Pipeline (19 Steps)
 
-Each marketing story (S5) consists of five steps:
-
-| Step | What | Who |
-|------|------|-----|
-| **S5a** | Marketing materials (positioning, scripts, ideas) | Agent: `marketing.md` |
-| **S5b** | Website update (data + build + deploy + verify) | Developer + Agent: `tst-site.md` |
-| **S5c** | Broadcast to users (3-gate review + send) | See "3-Gate Broadcast" below |
-| **S5d** | "Talking head" script (30-sec video text) | Agent: `marketing.md` |
-| **S5e** | Distribution (trainees + sales team) | User |
-
-### 3-Gate Broadcast Review (S5c)
-
-Before any broadcast reaches users, it passes through three independent review gates:
+The core of the system. No feature ships without going through all 19 steps:
 
 ```
-Draft message
-  → Gate 1: Agent pm-review.md (copy, scenarios, tone)
-  → Gate 2: Agent ux-review.md (style guide, visual consistency)
-  → Gate 3: Agent tst-stage.md (deploy, buttons work, callbacks)
-  → Preview to owner (--preview flag)
-  → User approval
-  → Production broadcast
+Phase 1 — DEV
+  Step 1: Code + Tests (all pass required)
+
+Phase 2 — STAGE
+  Step 2: Deploy to STAGE (via deploy-agent)
+  Step 3: Start parser (if applicable)
+  Step 4: E2E Test (tst-stage agent, Sonnet)
+  Step 5: PM Review (pm-stage agent, Opus)
+  Step 6: UX Review (ux-review agent, Opus)
+  Step 7: User Smoke Test ← COMPOUND GATE: 4+5+6 all pass
+
+Phase 3 — PROD
+  Step 8: Deploy to PROD (via deploy-agent)
+  Step 9: Start parser (if applicable)
+  Step 10: E2E Test (tst-prod agent, Sonnet)
+  Step 11: PM Review (pm-prod agent, Opus)
+  Step 12: UX Review (ux-review agent, Opus)
+  Step 13: User Smoke Test ← COMPOUND GATE: 10+11+12 all pass
+
+Phase 4 — Go To Market
+  Step 14: Marketing Materials (marketing agent, Opus)
+  Step 15: Website Update (webdevops agent, Sonnet)
+  Step 16: Broadcast 3-Gate Review (PM → UX → Tester)
+  Step 17: Broadcast 3-Step Send (STAGE preview → PROD preview → full send)
+  Step 18: Talking Head + Distribution
+
+Phase 5 — Close
+  Step 19: Scrum Master Review (3 rounds, Opus)
 ```
 
-Each gate agent works independently with a clean context. If any gate finds issues, fix and re-run that gate.
+Plus 5 conv_log audit gates (0a, 0b, 7.5, 13.5, 19.5) that enforce conversation logging discipline, tracked in `pipeline-state.yml`.
 
-## Iterative Scrum Master Review
+**Key principle:** Sub-agents verify BEFORE user smoke-tests. Never ask user to test until automated checks pass.
 
-After completing an epic, run up to 4 rounds of scrum master review:
-
-1. Review documentation (CLAUDE.md, memory files, templates) against checklist
-2. **Show findings to user — mandatory approval** before fixing anything
-3. Fix only approved findings
-4. Re-review — verify fixes + look for new issues
-5. Repeat until 0 findings or 4 rounds
-
-**Rule:** The scrum master finds problems. The user decides what to fix.
-
-### Scrum Master Checklist
-
-**Documentation quality:**
-- [ ] No garbage or outdated info?
-- [ ] No contradictions?
-- [ ] All file/doc references valid?
-
-**Memory files:**
-- [ ] All entries current and accurate?
-- [ ] No stale claims about code behavior?
-
-**Templates:**
-- [ ] Cover the current process?
-- [ ] Examples up to date?
-
-**Process:**
-- [ ] Completed task reflected in docs?
-- [ ] Problems from this cycle documented?
-- [ ] 1-3 improvements identified?
-
-## Usage with Claude Code
-
-1. Copy the `sub-agents/` directory into your project's `docs/` folder
-2. Customize the templates:
-   - Replace `{{PLACEHOLDER}}` values with your project's specifics
-   - Update checklists to match your product's needs
-3. Reference them in your CLAUDE.md deploy process
-4. Launch via Claude Code's Agent tool:
+## The New Feature Pipeline
 
 ```
-Agent(prompt="Run E2E test on STAGE. Brief: docs/briefs/my-feature.md. E2E plan: [steps]. Use docs/sub-agents/tst-stage.md as your instructions.", model="sonnet")
+/new-feature "description"
+  → Phase 0: Initialize (work dir, interview.yml)
+  → Phase 1.5: PM Ideation (5 value ideas + hybrid, Opus)
+  → Phase 1-3: 3-Cycle Interview (Business → UX/CJM → Technical)
+      YAML scoring, 85% threshold, session-resumable
+  → Phase 6: User-Spec creation + approval
+  → Phase 1-3 Planning: Tech-Spec with validator agents:
+      - Skeptic: verify all file/function claims actually exist
+      - Completeness Validator: bidirectional user-spec ↔ tech-spec traceability
+      - Architect Review: 5 code rules check
+  → Phase 6: User approval → /deploy
 ```
 
-## Customization Points
+## The Development Skill (TDD + Dual Review)
 
-Each template has `{{PLACEHOLDER}}` sections to fill in:
+For code changes, the system enforces:
 
-| Placeholder | Description |
-|-------------|-------------|
-| `{{SSH_COMMAND}}` | How to connect to your server |
-| `{{CLI_COMMAND}}` | How to run your test CLI |
-| `{{DB_CHECK}}` | How to query your database |
-| `{{MEMORY_PATH}}` | Path to your project's memory files |
-| `{{STYLE_GUIDE}}` | Path to your style guide |
-| `{{TEXTS_FILE}}` | Path to your texts/copy file |
-| `{{WEBSITE_URL}}` | Your project's website URL |
-| `{{WEBSITE_DIST}}` | Path to built website bundle |
-| `{{WEBSITE_SRC}}` | Path to website source data |
+1. **Plan first** — show plan to user, wait for explicit "yes"
+2. **TDD for core/** — write failing test → implement → pass
+3. **Sync all frontends** — TG + MAX + CLI always together
+4. **Dual reviewer**:
+   - code-reviewer (Sonnet): architecture, sync, security
+   - financial-reviewer (Opus): payment/billing/audit code (on demand)
+5. **Convergence pattern** — if both reviewers find same issue = high confidence
 
-## Template Structure
+## Trust Event Recovery
+
+When Claude misrepresents a capability (says X is available but X isn't), the `docs/playbooks/trust-event-recovery.md` defines an 8-step recovery sequence:
+
+1. Honest acknowledgment (name the failure explicitly)
+2. Read user directives carefully (no shortcuts)
+3. Incident entry in memory BEFORE code changes
+4. Separate process commit from feature commit
+5. Full pipeline, no shortcuts
+6. Explicit verification queries in PROD smoke
+7. 3-round retro + explicit "trust restored?" question
+8. Rule changes go to CLAUDE.md NEVER section
+
+## Quickstart for New Projects
+
+### 1. Copy the structure
+
+```bash
+cp -r .claude/ your-project/.claude/
+cp -r docs/ your-project/docs/
+```
+
+### 2. Customize configuration
+
+Replace placeholders throughout:
+
+| Placeholder | Replace with |
+|---|---|
+| `<PROJECT>` | Your project name |
+| `<PROD_PROJECT>` | Production project variant name |
+| `<SITE_DOMAIN>` | Your website domain |
+| `$PROJECT_DIR` | Absolute path to your project |
+| `<CODE_SERVER>` | Your development server IP |
+| `<RUN_SERVER>` | Your production server IP |
+| `<STAGE_PATH>` | STAGE environment path on Run server |
+| `<PROD_PATH>` | PROD environment path on Run server |
+| `<ADMIN_USER_ID>` | Your Telegram/bot admin user ID |
+| `<TEST_USER_ID>` | Test user ID for E2E testing |
+
+Key files to customize:
+- `.claude/skills/deploy-pipeline/references/deploy-commands.md` — server IPs, paths, service names
+- `.claude/skills/development/references/code-rules.md` — your 5 architecture invariants
+- `docs/sub-agents/*.md` — update `{{SSH_COMMAND}}`, `{{CLI_COMMAND}}`, `{{DB_CHECK}}`, `{{MEMORY_PATH}}` placeholders
+
+### 3. Set up CLAUDE.md
+
+Reference the skills in your CLAUDE.md:
+
+```markdown
+## Commands
+| /new-feature | New feature | Discovery → Planning |
+| /deploy | Deploy + GTM | 19-step pipeline |
+| /done | Close task | Scrum master review |
+| /write-code | Quick task | Bug fix, small feature |
+| /broadcast | Broadcast | 3-gate + 3-step send |
+```
+
+### 4. Set up conv_log (optional but recommended)
+
+The system uses a conversation log database for retrospectives:
+
+```bash
+# scripts/conv_log.py logs to data/conversation.db
+# Query: SELECT epic, role, type, content FROM messages WHERE epic LIKE 'G2%'
+```
+
+### 5. Launch via Claude Code Agent tool
 
 ```
-sub-agents/
-  tst-stage.md    — Tester for staging environment
-  tst-prod.md     — Tester for production environment
-  tst-site.md     — Site/website verifier
-  pm-stage.md     — PM reviewer for staging (CJM walk-through)
-  pm-prod.md      — PM reviewer for production
-  pm-review.md    — PM reviewer for broadcast/notifications
-  ux-review.md    — UX reviewer for broadcast/notifications
-  marketing.md    — Marketing strategist
+Agent(
+  prompt="You are a tester. Read your instructions from docs/sub-agents/tst-stage.md.
+  Brief: {path to brief}. E2E plan: {steps from tech-spec}.
+  SSH to <RUN_SERVER>, run project CLI, test the feature, check DB.
+  Read 'Lessons Learned' section and add 'Applied lessons' table to report.",
+  model="sonnet"
+)
 ```
+
+## Lessons Learned (from real project)
+
+All "Lessons Learned" sections across agents contain examples from a real project. They explain WHY each rule exists. Examples use format "Example from project (G2-E8): ..." to distinguish illustrative examples from rules.
+
+**Key lessons that shaped this system:**
+
+| Problem | Rule Created | Where |
+|---|---|---|
+| 7 bugs shipped to PROD because PM/UX review skipped | Compound gates (Steps 7 and 13) require ALL 3 preceding sub-agents | deploy-pipeline/SKILL.md |
+| Broadcast sent to PROD without STAGE preview | Mandatory 3-step send: STAGE preview → PROD preview → full send | Step 17 |
+| Worktree agent missed 6 INSERT sites for audit column | Signature Drift Check: grep all callers, not just tech-spec list | code-reviewer.md, development/SKILL.md |
+| Site deploy marked "PASS" but scp never reached Run | webdevops mandatory Step 5 + live URL verify via WebFetch | webdevops.md |
+| Claude promised data that wasn't there | trust-event-recovery.md playbook | docs/playbooks/ |
+| Conv_log entries fell below expected minimum | 5 audit gates in pipeline-state.yml | deploy-pipeline references |
 
 ## Philosophy
 
-- **Sub-agents don't fix code** — they find and report issues
+- **Sub-agents don't fix code** — they find and report. Orchestrator decides.
 - **Clean context** — each agent starts fresh, simulating a real team member
 - **Structured output** — standardized report formats for easy parsing
-- **Model matching** — Sonnet for fast testing, Opus for nuanced PM/marketing/UX work
-- **Mandatory approval** — scrum master findings require user sign-off before changes
+- **Model matching** — Sonnet for fast testing, Opus for nuanced PM/marketing/UX/financial work
+- **Mandatory approval** — scrum master and code review findings require user sign-off before changes
+- **Pipeline state = source of truth** — pipeline-state.yml is the only protection against skipped steps
+- **Lessons are first-class** — every failure creates a lesson in the agent that should have caught it
 
 ## Related
 

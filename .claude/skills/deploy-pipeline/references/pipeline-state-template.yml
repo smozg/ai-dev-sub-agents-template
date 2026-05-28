@@ -1,0 +1,199 @@
+# pipeline-state.yml — Template
+# Created by /deploy at Step 0. Updated by orchestrator at each step.
+# Post-compact hook reads this to recover pipeline position.
+#
+# Usage: copy to work/{feature}/pipeline-state.yml, fill epic/feature
+#
+# Effective 24 steps: 19 deploy + 5 conv_log audit gates.
+# Audit gates check that orchestrator logs decisions/insights/messages to conv_log
+# for scrum-master per-feature + weekly + monthly retros.
+
+epic: ""           # e.g. G2-E9
+feature: ""        # e.g. feature-name
+pipeline: deploy
+started: ""        # ISO timestamp
+updated: ""        # ISO timestamp
+current_step: "0a"
+current_phase: AUDIT_DISCOVERY
+
+steps:
+  # ── Pre-deploy audit gates ────────────────────────────────────────────────
+  "0a":
+    name: "Audit Discovery — conv_log discipline check"
+    phase: AUDIT_DISCOVERY
+    status: pending
+    expected_min_entries: 3
+    actual_entries: null
+    audit_types_seen: []     # [decision, insight, question, message, phase]
+    notes: "Check: how many conv_log entries during 3-cycle interview? Expected ≥3 (decisions+insights+questions)."
+  "0b":
+    name: "Audit Planning — conv_log discipline check"
+    phase: AUDIT_PLANNING
+    status: pending
+    expected_min_entries: 3
+    actual_entries: null
+    audit_types_seen: []
+    notes: "Check: validator results + architecture decisions logged? Expected ≥3."
+  # ── Deploy pipeline ──────────────────────────────────────────────────────
+  1:
+    name: "Code + Tests"
+    phase: DEV
+    status: pending       # pending | running | done | failed
+    gate_passed: null
+    notes: ""
+  2:
+    name: "Deploy to STAGE"
+    phase: STAGE
+    status: pending
+    gate_passed: null
+    notes: ""
+  3:
+    name: "Start STAGE Parser"
+    phase: STAGE
+    status: pending
+    gate_passed: null
+    notes: ""
+  4:
+    name: "E2E Test STAGE (Sonnet)"
+    phase: STAGE
+    status: pending
+    gate_passed: null
+    findings_count: 0
+    findings_fixed: 0
+    notes: ""
+  5:
+    name: "PM Review STAGE (Opus)"
+    phase: STAGE
+    status: pending
+    gate_passed: null
+    findings_count: 0
+    findings_fixed: 0
+    notes: ""
+  6:
+    name: "UX Review STAGE (Opus)"
+    phase: STAGE
+    status: pending
+    gate_passed: null
+    findings_count: 0
+    findings_fixed: 0
+    notes: ""
+  7:
+    name: "User Smoke Test STAGE"
+    phase: STAGE
+    status: pending
+    gate_passed: null
+    user_confirmed: null   # ISO timestamp when user says OK
+    notes: ""
+  "7.5":
+    name: "Audit STAGE — conv_log discipline check"
+    phase: AUDIT_STAGE
+    status: pending
+    expected_min_entries: 4
+    actual_entries: null
+    audit_types_seen: []
+    notes: "Check: code/tests/deploy/reviews/smoke phases logged? Expected ≥4."
+  8:
+    name: "Deploy to PROD"
+    phase: PROD
+    status: pending
+    gate_passed: null
+    notes: ""
+  9:
+    name: "Start PROD Parser"
+    phase: PROD
+    status: pending
+    gate_passed: null
+    notes: ""
+  10:
+    name: "E2E Test PROD (Sonnet)"
+    phase: PROD
+    status: pending
+    gate_passed: null
+    findings_count: 0
+    findings_fixed: 0
+    notes: ""
+  11:
+    name: "PM Review PROD (Opus)"
+    phase: PROD
+    status: pending
+    gate_passed: null
+    findings_count: 0
+    findings_fixed: 0
+    notes: ""
+  12:
+    name: "UX Review PROD (Opus)"
+    phase: PROD
+    status: pending
+    gate_passed: null
+    findings_count: 0
+    findings_fixed: 0
+    notes: ""
+  13:
+    name: "User Smoke Test PROD"
+    phase: PROD
+    status: pending
+    gate_passed: null
+    user_confirmed: null
+    notes: ""
+  "13.5":
+    name: "Audit PROD — conv_log discipline check"
+    phase: AUDIT_PROD
+    status: pending
+    expected_min_entries: 3
+    actual_entries: null
+    audit_types_seen: []
+    notes: "Check: PROD deploy + smoke + any issues logged? Expected ≥3."
+  14:
+    name: "Marketing Materials (Opus)"
+    phase: GTM
+    status: pending
+    gate_passed: null
+    notes: ""
+  15:
+    name: "Website Update + Site Tester"
+    phase: GTM
+    status: pending
+    gate_passed: null
+    notes: ""
+  16:
+    name: "Broadcast 3-Gate Review"
+    phase: GTM
+    status: pending
+    gate_passed: null
+    notes: ""
+  17:
+    name: "Broadcast 3-Step Send"
+    phase: GTM
+    status: pending
+    gate_passed: null
+    notes: ""
+  18:
+    name: "Talking Head + Distribution"
+    phase: GTM
+    status: pending
+    gate_passed: null
+    notes: ""
+  19:
+    name: "Scrum Master Review"
+    phase: CLOSE
+    status: pending
+    gate_passed: null
+    notes: ""
+  "19.5":
+    name: "Audit Close — conv_log discipline check (final)"
+    phase: AUDIT_CLOSE
+    status: pending
+    expected_min_entries: 2
+    actual_entries: null
+    audit_types_seen: []
+    notes: "Check: retro decisions + archive phase logged? Expected ≥2."
+  "19.6":
+    name: "Second Brain — daily achievement entry"
+    phase: CLOSE
+    status: pending
+    notes: |
+      Add entry to daily achievement journal.
+      Format: `## HH:MM <epic>: <highlight>` followed by 1-3 lines (what was done + key lesson).
+      Commit + push journal repo.
+      Per global CLAUDE.md "Achievement diary" rule.
+      Mandatory before claiming epic CLOSED.

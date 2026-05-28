@@ -60,4 +60,25 @@ User: {{TEST_USER_ID}}
 - PASS: N of M
 - FAIL: N of M
 - Bugs found: [list]
+
+### Applied Lessons
+
+| Lesson | Where checked | Result |
+|---|---|---|
+| Service starts after deploy | journalctl --since restart | PASS / FAIL |
+| Paywall regression (if level-gated feature) | L<N callback test | PASS / FAIL / N/A |
+| Schema migration verify (if DB column added) | PRAGMA table_info(<table>) → column exists. COUNT(*) WHERE col='' → 0 after backfill | PASS / FAIL / N/A |
 ```
+
+## Paywall Regression (MANDATORY for level-gated features)
+
+If feature is gated by level (`level >= N`) — for each callback of the feature, call it directly via CLI as user with `level=N-1`. Expected: unlock offer or locked screen. If callback skips level check → critical FAIL + stop deploy.
+
+Example from project (G2-E9): on PROD, L9 user could call `ai_run` callback directly → triggered Opus analysis without L10 subscription. Only the slash command had a level gate; the callback did not. tst-prod missed this.
+
+## Lessons Learned (updated by scrum-master after each epic)
+
+- **Example from project (G2-E5):** Partial deploy (flows.py without db.py) → PROD crash. Tester should check that bot starts at all (`systemctl status`).
+- **Example from project (G2-E5):** Web endpoint cross-DB — service read wrong DB. **Lesson:** if feature uses web endpoint, verify endpoint sees PROD data.
+- **Example from project (G2-E8):** PROD E2E found 1 anomaly but missed text/UX bugs (caught by PM/UX agents). **Lesson:** Tester checks functionality, NOT text — don't duplicate PM/UX checklists.
+- **Example from project (G2-E9):** Paywall bypass — any L<N callback passed without level-gate. **Lesson:** test **each** callback of the feature as L<N user, not just the entry-point from menu.
