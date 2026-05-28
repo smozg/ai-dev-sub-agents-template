@@ -58,7 +58,7 @@ Tech-spec MUST include section "Parallel Execution Plan" (per plan-template.md).
 ### 4. Architecture pattern compliance
 
 If story is in known pattern category (payment, audit, data migration, etc.):
-- Read corresponding memory file (`<PROJECT>-tbank-payments.md`, etc.)
+- Read corresponding memory file (`obrep-bot-tbank-payments.md`, etc.)
 - Verify tech-spec follows established patterns (e.g., payment idempotency via DB UNIQUE, audit via persistent table)
 
 ### 5. Risk-vs-time tradeoff
@@ -127,8 +127,23 @@ APPROVED for development | CHANGES_REQUIRED with action items below
 - **WARN on partial.** Mark uncertain items for orchestrator judgment.
 - **Time-box.** Architect review = 5-10 min target. If taking >15 min, you're over-engineering.
 
+## Manual user steps SDK verification (G2-E10-S1 lesson)
+
+When tech-spec includes **"User manual step"** (registering webhook URL, OAuth setup, etc.) — architect MUST verify via SDK source that the step is actually required + format is correct.
+
+**G2-E10-S1 case:** tech-spec said "User registers webhook URL в MAX dev console". Architect approved without verifying. Reality: MAX dev console **doesn't have webhook setting field** — registration is programmatic via `bot.subscribe_webhook(url)`. User wasted time searching UI, post-deploy fix needed.
+
+**Check pattern:**
+```bash
+# Look for explicit SDK methods that user manual step might cover:
+grep -rn "def.*register\|def.*subscribe\|def.*setup" /path/to/sdk/ | head -10
+```
+
+If SDK has programmatic method covering the manual step → tech-spec should automate (in startup or one-shot script), not push to user.
+
 ## Lessons Learned (updated by scrum-master after epics)
 
-- **trust-event-recovery (trust event recovery):** Tech-spec missed bypass routes — renderer hooks added but handlers had 90+ direct sends bypassing them. Architect must verify NEW hooks/instrumentation cover ALL parallel pathways (grep across handlers/subscriptions/billing).
+- **G2-E10-S23 (trust event recovery):** Tech-spec missed bypass routes — renderer hooks added but handlers had 90+ direct sends bypassing them. Architect must verify NEW hooks/instrumentation cover ALL parallel pathways (grep across handlers/subscriptions/billing).
 - **G2-E10-S20 (terminal_id):** Tech-spec listed only some callers of signature-changed function. Architect must grep all callers when signature changes.
 - **G2-E10-S7 (template sync) → S25 (process change):** Parallelization not previously analyzed in tech-specs → Wave Execution often skipped. New mandatory section forces explicit consideration.
+- **G2-E10-S1 (PROD MAX connect):** Manual user step "register webhook in MAX dev console" was wrong assumption — реально programmatic via `bot.subscribe_webhook(url)`. Architect approved without SDK verification. New mandate above: verify "User manual steps" against SDK source.

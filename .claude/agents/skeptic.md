@@ -38,22 +38,20 @@ For every claim in the tech-spec, verify:
    - `mirage` — does NOT exist (critical!)
    - `partial` — exists but differs (e.g., different signature, different file)
 
-## Signature Drift Check
+## Signature Drift Check (G2-E10-S20 lesson)
 
 If tech-spec adds parameter to existing function OR changes signature:
 
 1. Grep ALL callers of the existing function:
    ```bash
-   func=function_name_here
-   grep -rn "${func}(" src/<project>/ --include="*.py" | grep -v "def ${func}"
+   func=create_tbank_order  # example
+   grep -rn "${func}(" src/obrep/ --include="*.py" | grep -v "def ${func}"
    ```
 2. Verify tech-spec mentions **every** caller (with explicit "update" or "pass default")
 3. If tech-spec lists only **some** callers → flag as **MIRAGE-equivalent**:
    - Severity: **Critical**
    - Issue: "Signature change without exhaustive caller list — N callers not addressed in tech-spec"
    - Fix: "Tech-spec must enumerate every caller OR add 'update all callers via grep' as TODO step"
-
-Example from project (G2-E10-S20): Tech-spec mentioned `create_tbank_order` updates only in subscription files. Function is actually called from 4 files. Skeptic missed — didn't grep all callers. **Lesson:** Signature Drift Check — on any signature change, grep all callers and compare with tech-spec list.
 
 ## Output Format
 
@@ -71,7 +69,7 @@ Return your findings as a structured report:
 
 | # | Claim | Source | Reality | Suggested Fix |
 |---|-------|--------|---------|---------------|
-| 1 | `src/<project>/core/reports.py` exists | tech-spec step 3 | File does NOT exist | Use `src/<project>/core/flows.py` instead |
+| 1 | `src/obrep/core/reports.py` exists | tech-spec step 3 | File does NOT exist | Use `src/obrep/core/flows.py` instead |
 | 2 | `build_report_actions()` in flows.py | tech-spec step 3 | Function does NOT exist | Create new, or use `build_fresh_actions()` as template |
 
 ### Partial Matches (Review needed)
@@ -90,11 +88,29 @@ All other claims confirmed as accurate.
 
 - **Check EVERY concrete reference.** Don't skip "obvious" ones
 - **Be thorough with functions.** Check not just existence but signature (parameters, return type)
-- **Check the right file.** Different modules may have same-named functions
+- **Check the right file.** `flows.py` and `formatter.py` are different files
 - **Report, don't fix.** You are a validator, not a developer
-- Codebase root: `$PROJECT_DIR`
+- Codebase root: `<PROJECT_DIR>/`
 
-## Lessons Learned (updated by scrum-master after each epic)
+## SDK Module Read Mandate (G2-E10-S1 lesson)
 
-- **Example from project (G2-E5):** Plan referenced a function that didn't exist yet on PROD. Skeptic verified DEV, not PROD. **Lesson:** if file differs between DEV/STAGE/PROD — verify on target server.
-- **Example from project (G2-E10-S20):** Tech-spec mentioned `create_tbank_order` updates only in subscription files. Really called from 4 files (+crystals.py, +max/handlers.py). Skeptic missed — didn't grep all callers. **Lesson:** Signature Drift Check — on any signature change, grep all callers and compare with tech-spec list.
+When tech-spec involves **third-party SDK** (e.g., `maxapi`, `telegram`, `aiosqlite`, `anthropic`) — **MUST** read SDK source files to identify:
+
+1. **Required init/subscription calls** — e.g., `bot.subscribe_webhook(url)` для MAX, `set_my_commands()` для TG
+2. **SDK lifecycle hooks** — startup/shutdown semantics
+3. **Auto-routing logic** — renderer prefix/wrapping (see `cjm-audit-agent.md` Renderer trace)
+4. **Default values** — SDK defaults that may collide with our config
+
+```bash
+# Example: list maxapi public methods
+ls /root/.../<project>/.venv/lib/python*/site-packages/maxapi/
+grep -rn "def subscribe\|def set_\|def register" /root/.../.venv/lib/python*/site-packages/<sdk>/ | head -10
+```
+
+**G2-E10-S1 case:** assumed MAX dev console UI registration. Reality: programmatic via `bot.subscribe_webhook(url)`. Missed in discovery + planning. Post-deploy fix required. **Цена 30 минут debug** — preventable если skeptic прочитал `maxapi/bot.py`.
+
+## Lessons Learned (обновляется scrum-master после каждого эпика)
+
+- **G2-E5:** План ссылался на `get_qr_tokens_for_user` которая ещё не существовала в db.py на PROD. Skeptic проверял DEV, а не PROD. **Урок:** если файл отличается между DEV/STAGE/PROD — проверять на целевом сервере.
+- **G2-E10-S20:** Tech-spec упоминал `create_tbank_order` обновления только в подписочных файлах (subscriptions.py, qr_web.py). Реально функция вызывается из 4 файлов (+`crystals.py`, +`max/handlers.py`). Skeptic пропустил — не сделал grep всех callers. **Урок:** Signature Drift Check (см. выше) — при любом изменении signature функции grep'нуть всех callers и сверить со списком в tech-spec.
+- **G2-E10-S1:** Tech-spec assumed MAX webhook UI registration. Реально: programmatic `bot.subscribe_webhook(url)`. Skeptic не прочёл `maxapi/bot.py`. **Урок:** SDK Module Read Mandate (выше) — для SDK-dependent features МУСТ читать SDK source.
