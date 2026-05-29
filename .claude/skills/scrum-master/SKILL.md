@@ -68,6 +68,12 @@ Agent(
 
 **After agent returns:** same approval cycle as Round 1.
 
+**⛔ Round 2 mandatory grep** (lesson source: real epic where 2/3 placeholder hashes were eyeballed and 1 missed):
+```bash
+grep -rn 'pending commit\|TBD\|TODO\|placeholder\|<COMMIT_HASH>' work/{feature}/*.yml
+```
+Any hit = NOT done. Patch before declaring Round 2 clean.
+
 ### Round 3: Final Check
 
 ```

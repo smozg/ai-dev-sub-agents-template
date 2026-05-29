@@ -18,13 +18,22 @@ Status: draft | approved
 
 ## Files to Modify
 
+⛔ **MANDATORY 3-interface checklist** (per project rule "any feature in core/ → wired to TG, MAX, AND CLI" — lesson source: real project HF2 where CLI was forgotten twice in one session). Any feature in `core/` MUST be wired in **TG + MAX + CLI**:
+
+- [ ] `<PROJECT_DIR>/src/<pkg>/tg/handlers.py` — TG command/callback handler
+- [ ] `<PROJECT_DIR>/src/<pkg>/max/handlers.py` — MAX command/callback handler (with `mx_*` prefix awareness if using auto-prefix renderer)
+- [ ] `<PROJECT_DIR>/src/<pkg>/cli/callbacks.py` — CLI dispatcher for test_cases.json coverage
+
+If an interface is intentionally skipped (admin-only, CLI N/A) — **document the reason explicitly** in Architecture Decisions section. Default = include all three.
+
 | File | What Changes |
 |------|-------------|
-| `src/obrep/core/texts.py` | New texts for {feature} |
-| `src/obrep/core/flows.py` | New `build_{feature}_actions()` |
-| `src/obrep/tg/handlers.py` | Handler for /{command} |
-| `src/obrep/max/handlers.py` | Same handler for MAX |
-| `src/obrep/cli/callbacks.py` | CLI callback for {feature} |
+| `<PROJECT_DIR>/src/<pkg>/core/texts.py` | New texts for {feature} |
+| `<PROJECT_DIR>/src/<pkg>/core/flows.py` | New `build_{feature}_actions()` |
+| `<PROJECT_DIR>/src/<pkg>/tg/handlers.py` | Handler for /{command} |
+| `<PROJECT_DIR>/src/<pkg>/max/handlers.py` | Same handler for MAX |
+| `<PROJECT_DIR>/src/<pkg>/cli/callbacks.py` | CLI callback for {feature} |
+| `<PROJECT_DIR>/tests/test_cases.json` | New T0XX entries for new callbacks (CLI coverage) |
 | ... | ... |
 
 ## Architecture Decisions
