@@ -58,7 +58,7 @@ For assigned level L{N}:
 3. **`src/obrep/max/renderer.py`** ← MANDATORY (auto-prefix logic — line 45)
 4. **`src/obrep/tg/renderer.py`** ← MANDATORY (TG renderer pattern)
 5. `src/obrep/core/flows.py` — shared builders
-6. `/root/.claude/projects/-root/memory/obrep-bot-cjm.md` — L{N} CJM section
+6. `<MEMORY_DIR>/obrep-bot-cjm.md` — L{N} CJM section
 7. Level-specific code (e.g., `subscriptions.py` для L2 paywall, `crystals.py` для unlock flow, `ai_strategy.py` для L10)
 
 ## Output format (strict)

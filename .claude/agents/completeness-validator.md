@@ -86,18 +86,18 @@ For every implementation step in tech-spec:
 - **Metrics must be testable.** If user-spec says "metric: user clicks /target again", tech-spec must explain how we verify this
 - **Report, don't fix.** You are a validator, not a planner
 
-## Data Migration Checks
+## Data Migration Checks (G2-E10-S20)
 
 For tech-specs that add a column OR transform existing rows:
 
 - **Backfill strategy explicit?** Tech-spec must include UPDATE SQL statements for existing rows. Without backfill — partial state (new rows correct, old rows empty).
-- **Audit accuracy default?** If tech-spec uses opaque marker (e.g. `LEGACY_UNKNOWN`, `MIGRATION_PENDING`) — justify why actual data can't be derived. Default should be actual values (source-of-truth data identifiers).
+- **Audit accuracy default?** If tech-spec uses opaque marker (e.g. `LEGACY_UNKNOWN`, `MIGRATION_PENDING`) — justify why actual data can't be derived. Default should be actual values (e.g. `DEMO_TERMINAL_xyz`, `STAGE_DB`, source-of-truth).
 - **Dry-run + rollback?** Backfill script has `--dry-run` default + documented rollback SQL. Without these — recovery from mistakes is manual.
 - **PRAGMA prerequisite check?** Backfill aborts if target column doesn't exist (defense against deploy-order mistake).
 
 If any of these missing → flag as **changes_required**.
 
-## Lessons Learned (updated by scrum-master after each epic)
+## Lessons Learned (обновляется scrum-master после каждого эпика)
 
-- **Example from project (G2-E5):** User-spec required "instant notifications on negative reviews" → tech-spec covered TG-only, MAX was missed. **Lesson:** check that platform routing (all frontends) is covered for each notification requirement.
-- **Example from project (G2-E10-S20):** Initial backfill used opaque `LEGACY_UNKNOWN` marker — user corrected to audit-accurate values. Re-apply on STAGE cost time. **Lesson:** default to actual values; flag opaque markers as partial coverage.
+- **G2-E5:** User-spec требовал "мгновенные уведомления о негативе" → tech-spec покрывал TG-only, MAX пропущен. **Урок:** проверять что platform routing (TG+MAX) покрыт для каждого notification requirement.
+- **G2-E10-S20:** Initial backfill использовал opaque `LEGACY_UNKNOWN` marker — user скорректировал на audit-accurate `DEMO`/`SYSTEM_TEST`/`PROD`. Re-apply на STAGE стоил времени. **Урок:** default to actual values; flag opaque markers как partial coverage.
