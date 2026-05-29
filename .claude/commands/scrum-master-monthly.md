@@ -5,7 +5,7 @@ Aggregate conv_log + weekly retros across past 30 days. Process-level retro.
 ## Step 1: Query window
 
 ```bash
-cd $PROJECT_DIR && uv run python -c "
+cd <PROJECT_DIR> && uv run python -c "
 import sqlite3
 db = sqlite3.connect('data/conversation.db')
 rows = db.execute(\"\"\"
@@ -40,7 +40,7 @@ Agent(
   - Which epics shipped vs slipped? Trends.
   - Discipline gaps reproducing across multiple features → systemic
   - Memory churn — how many feedback_*.md files created/updated?
-  - Are rules being followed (hotfix threshold, audit gates, etc.)?
+  - Are rules being followed (Hotfix threshold, audit gates, etc.)?
   - Trust events — any user CORRECTIONs that hurt confidence?
 
   Output: docs/retros/monthly-YYYY-MM.md with:
@@ -60,4 +60,4 @@ Same approval cycle. Major rule changes (CLAUDE.md) — explicit user OK first.
 ## Schedule
 
 - Run **last Friday of each month** OR by command
-- Cron entry: optional (easier to run manually)
+- Cron entry: optional (months don't divide evenly into days, easier manual)

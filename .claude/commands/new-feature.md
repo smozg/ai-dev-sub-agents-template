@@ -34,5 +34,5 @@ After user-spec is approved, load the `planning` skill:
 
 After plan is approved:
 - Update `docs/BACKLOG.md` with new stories (if epic)
-- Log: `cd $PROJECT_DIR && uv run python scripts/conv_log.py {EPIC} claude phase "planning complete, ready for development"`
+- Log: `cd <PROJECT_DIR> && uv run python scripts/conv_log.py {EPIC} claude phase "planning complete, ready for development"`
 - Inform user: "Plan approved. Use `/write-code` or `/deploy` when ready."

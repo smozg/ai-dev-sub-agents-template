@@ -1,11 +1,11 @@
 # /scrum-master-weekly
 
-Aggregate conv_log across past 7 days. Run manually OR via Monday 09:00 cron.
+Aggregate conv_log across past 7 days. Run manually OR via Monday 09:00 MSK cron.
 
 ## Step 1: Query window
 
 ```bash
-cd $PROJECT_DIR && uv run python -c "
+cd <PROJECT_DIR> && uv run python -c "
 import sqlite3
 db = sqlite3.connect('data/conversation.db')
 rows = db.execute(\"\"\"
@@ -51,10 +51,10 @@ Show user the weekly retro. If action items → approval cycle (same as feature 
 git add docs/retros/weekly-*.md && git commit -m "weekly retro: YYYY-WW"
 ```
 
-## Cron schedule (Monday 09:00)
+## Cron schedule (Monday 09:00 MSK)
 
-Configure Monday 09:00 cron to remind user to run this command.
+`/etc/cron.d/obrep-weekly-retro` reminds user at 09:00 every Monday to run this command.
 
 ## When to skip
 
-- If the week had no activity (≤5 conv_log entries) — note "quiet week" and skip
+- Если за неделю не было активности (≤5 conv_log entries) — note "quiet week" и пропустить
