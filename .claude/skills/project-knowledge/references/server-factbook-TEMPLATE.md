@@ -48,7 +48,7 @@ From this enumeration → derive section list → collect each section.
 3. Application Apps Inventory (Django apps / Rails apps / etc)
 4. Active Session / Active User Domain (for active-session gate in deploy)
 5. Existing CI/CD Workflows
-6. Git Checkouts on Server (remotes, branches, HEAD)
+6. Git Checkouts on Server (remotes, branches, HEAD + **Working tree state**)
 7. Sudoers + system tools
 8. Nginx / Apache vhosts
 9. Cron jobs (root + cron.d)
@@ -57,6 +57,39 @@ From this enumeration → derive section list → collect each section.
 12. External Integrations (payment gateways, video, OAuth, CRM)
 13. Other host-level services (PHP-FPM, Apache, host-nginx, etc.)
 14. Appendix — raw collection outputs (for audit)
+
+## Section 6 expanded — Git Checkouts on Server (real-project lesson)
+
+Section 6 MUST include `git status --short` snapshot of each checkout, not only remote/branch/HEAD. Without cleanliness tracking, factbook gives false confidence "everything's in git" while server may have unstaged production drift (real example: a Django migration with a manually-applied PostgreSQL fix sat as dirty in working tree for months, invisible to factbook).
+
+```markdown
+## 6. Git Checkouts on Server
+
+**Last verified:** YYYY-MM-DD HH:MM
+**TTL:** 30 days
+
+### Sparse-checkout structure (clarify if applicable)
+
+If `/path/A` and `/path/B` are sparse subdirs of the SAME repo: document explicitly. One `.git/`, shared HEAD, modified files visible from both.
+
+### `/path/A` checkout
+- **Remote:** `https://<host>/<repo>.git`
+- **Branch:** `<branch>`
+- **HEAD:** `<hash> <subject>`
+
+### `/path/B` checkout
+- (same pattern)
+
+### Working tree state
+
+**Last verified:** YYYY-MM-DD HH:MM
+**State:** clean | dirty (N modified, M untracked tracked files)
+**TTL:** 30 days
+
+If dirty — list modified files with severity classification (migration P0, scripts P1, config P2). Cleanup pre-condition for migration / CI/CD epics.
+```
+
+Distinguish tracked-file modifications (in scope of factbook) from untracked shell-home files (out of scope).
 
 ## Findings format
 
