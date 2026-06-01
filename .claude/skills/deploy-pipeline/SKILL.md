@@ -349,6 +349,40 @@ Even discovery epics that SSH to the server should respect the rule. If discover
 
 ---
 
+## Ops/maintenance epics — pipeline adaptations (added from real-project retro)
+
+Ops-class epics (file rename, mode fix, divergence cleanup, security patch hygiene) are distinct from feature deploys AND from discovery epics. Pattern:
+
+```yaml
+adaptations:
+  - "Step 1 (DEV): adapted as 'audit + per-file diff generation'"
+  - "Step 2 (STAGE deploy): adapted as 'apply policies on server + workspace memory updates'"
+  - "Step 3 (parser): SKIPPED — N/A"
+  - "Step 4 (Tester): adapted — verify post-conditions inline (no separate Sonnet agent if mechanical)"
+  - "Steps 5-6 (PM/UX): N/A — no UI/CJM"
+  - "Steps 8-18 (PROD + GTM): SKIPPED — internal maintenance"
+  - "Step 19 (retro): mandatory"
+```
+
+**Key differences from discovery and from feature epics:**
+
+- **Step 4 tester can be inline** (orchestrator runs verification commands directly) if all checks are mechanical (grep, status, hash). No separate Sonnet dispatch needed if work is non-judgemental.
+- **Active-session gate is often N/A** because ops-epics touch git/filesystem, not running services. See feedback.md "Active-session gate — когда обязателен, когда N/A".
+- **Per-instance approval with batch-mode** for class-homogeneous artifacts: if you have N items where most share a signature (mode-only diffs, identical refactor pattern) — offer batch-approval with class-default + per-instance escape hatch. Saves user decision fatigue without sacrificing safety.
+
+### Batch-approval mode (added from real-project)
+
+When proposing N decisions to user:
+
+```
+"All 7 shell scripts are mode-only (100644 → 100755). Approve all as commit-upstream?"
+[Yes batch] / [Per-file review]
+```
+
+User retains "Per-file review" escape. Apply only for class-homogeneous diffs; migration / content-modified diffs ALWAYS per-file.
+
+---
+
 ## Rules
 
 - **NEVER `systemctl restart` on Code server** — only on Run

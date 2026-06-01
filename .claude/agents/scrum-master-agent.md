@@ -183,17 +183,25 @@ grep -rn '<pattern>' .claude/ docs/ /root/Automations/<project>/*.md
 
 Not just `.claude/ + docs/`. Root-level `CLAUDE.md` is loaded every session and slips through narrower scopes.
 
-### Convergent rate as KPI
+### Convergent rate as KPI — class-based interpretation
 
 Compute and report:
 - `convergent_findings` = findings flagged by ≥2 validators (skeptic, completeness, architect, tester).
 - Trend vs previous retros stored in `work/completed/<epic>/retro-round-1.md`.
-- Interpretation:
-  - `≥3 convergent` → tech-spec was sloppy; planning needs rework.
-  - `1-2 convergent` → normal validation cycle.
-  - `0 convergent` → either clean OR validators agreed to skip same issue (suspect quality).
 
-This is a tech-spec quality signal more precise than total finding count.
+**Class-based interpretation** (the same `0 convergent` means different things for different epic types):
+
+| Epic class | Normal convergent range | `0` interpretation |
+|---|---|---|
+| Feature (UI + DB + API) | 1-3 | suspect if validators didn't deep-read |
+| Migration / monolith refactor | 2-5 | architectural surface = more convergence opportunities |
+| Discovery (factbook collection, audit) | 0-1 | 0 is normal — narrow surface |
+| Ops/maintenance (rename, cleanup, mode-fix) | 0-1 | 0 is normal — no architecture in play |
+| Infrastructure (CI/CD, runner setup) | 1-2 | tooling-class convergence |
+
+Above-normal `convergent_findings` for the class → tech-spec needs rework. Within range → normal cycle.
+
+This back-ports from real-project retros where a flat "0 = suspect" rule produced false alarms on ops-class epics.
 
 ## Second Brain entry check (G2-E10-S23 process improvement)
 
