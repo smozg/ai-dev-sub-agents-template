@@ -156,9 +156,44 @@ print('Total entries by type:', dict(rows))
 
 | Round | Focus |
 |-------|-------|
-| **1** | Full raw analysis — all findings, all categories. **MANDATORY:** conv_log discipline check (5 phases). |
+| **1** | Full raw analysis — all findings, all categories. **MANDATORY checks** (see below): conv_log discipline + session-gate + host-level service inventory + root-level scope grep + convergent rate trend. |
 | **2** | Verify fixes from Round 1 applied. Look for NEW issues from fixes. Short report. |
 | **3** | Final check — "чисто? можно закрывать?" Yes/No with remaining items if any. **MANDATORY:** Second Brain entry check (see below). |
+
+## Round 1 mandatory checks (added 2026-06-01 from real-project retro)
+
+### Host-level service inventory check
+
+For epics that involve server infrastructure (deploy, discovery, ops), verify the factbook actually enumerated all listening services, not just docker.
+
+```bash
+ssh <run-server> "ss -tlnp 2>/dev/null | head -30"
+ssh <run-server> "systemctl list-units --type=service --state=running --no-pager | head -30"
+```
+
+Cross-check factbook against this list. If any non-docker service exists on the host but is absent from the factbook → flag P1 finding. Common gotchas: `php8.3-fpm.service`, `apache2.service`, host-level `nginx`, host-level cron jobs not in `/etc/cron.d/`.
+
+### Root-level scope grep
+
+When evaluating cross-file replacements (renames, conventions), grep also covers root-level files:
+
+```bash
+grep -rn '<pattern>' .claude/ docs/ /root/Automations/<project>/*.md
+```
+
+Not just `.claude/ + docs/`. Root-level `CLAUDE.md` is loaded every session and slips through narrower scopes.
+
+### Convergent rate as KPI
+
+Compute and report:
+- `convergent_findings` = findings flagged by ≥2 validators (skeptic, completeness, architect, tester).
+- Trend vs previous retros stored in `work/completed/<epic>/retro-round-1.md`.
+- Interpretation:
+  - `≥3 convergent` → tech-spec was sloppy; planning needs rework.
+  - `1-2 convergent` → normal validation cycle.
+  - `0 convergent` → either clean OR validators agreed to skip same issue (suspect quality).
+
+This is a tech-spec quality signal more precise than total finding count.
 
 ## Second Brain entry check (G2-E10-S23 process improvement)
 

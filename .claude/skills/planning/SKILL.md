@@ -23,8 +23,14 @@ Planning transforms an approved user-spec (WHAT) into a tech-spec (HOW). Two aut
 3. Read relevant project context:
    - `<PROJECT>-architecture.md` — code structure, patterns
    - `<PROJECT>-cjm.md` — where this fits in the journey (section relevant to the level)
-   - `src/obrep/core/flows.py` — existing build_*_actions() patterns
-   - `src/obrep/core/texts.py` — existing text patterns
+   - Domain-specific source files for existing patterns
+4. **Conditional (added 2026-06-01):** if tech-spec will reference docker services/stacks, application models, SSH/sudoers/nginx/cron, PHP-FPM, Apache, or host-level services — read `.claude/memory/server-factbook.md` FIRST and quote exact values from it. Do not write tech-spec claims from memory.
+5. **For infra-epics (deploy/discovery/ops): `ss -tlnp` first.** Before drafting factbook scope or referencing services, enumerate ALL listening services on the target host:
+   ```bash
+   ssh <server> "ss -tlnp"
+   ssh <server> "systemctl list-units --type=service --state=running"
+   ```
+   Tech-spec scope = derived from this enumeration, not "what I remember exists". This prevents hallucination-class findings (a real production system might exist on the host but be invisible to memory).
 
 ## Phase 1: Codebase Research
 

@@ -10,7 +10,31 @@ findings: []
 #  - id: F1
 #    step: 4                 # pipeline step that found this
 #    source: tst-stage       # sub-agent name or "user"
-#    severity: bug           # bug | ux | text | idea
+#    severity: bug           # bug | ux | text | idea | P0 | P1 | P2 | P3
 #    status: open            # open | fixed | wont_fix | deferred
 #    description: ""
 #    fix_applied: null       # what was done to fix it
+
+# Convergent findings (added 2026-06-01 from real-project retro lesson)
+# Track findings flagged independently by ≥2 validators (skeptic + completeness + architect + tester).
+# This is a precise tech-spec quality signal — more useful than total finding count.
+#
+# Interpretation:
+#   ≥3 convergent  → tech-spec was sloppy; planning needs rework
+#   1-2 convergent → normal validation cycle
+#   0 convergent   → either clean OR validators agreed to skip same issue (suspect)
+convergent: []
+# Example entry:
+#  - F001 + F006: Skeptic + Architect both flagged "Required reading section creation"
+
+# Round comparison (optional, populated by scrum-master after each retro)
+round_comparison:
+  # round_1:
+  #   findings_total: 16
+  #   convergent: 5
+  #   verdict: "radical rework"
+  # round_2:
+  #   findings_total: 11
+  #   convergent: 2
+  #   verdict: "surgical fixes"
+  # trend: "75% reduction in P0+P1, 0 architectural blockers"

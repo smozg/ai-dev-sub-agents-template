@@ -69,12 +69,19 @@ If story is in known pattern category (payment, audit, data migration, etc.):
 
 ## Process
 
+### Required reading (conditional, added 2026-06-01)
+
+If tech-spec touches Docker services/stacks, Django models, SSH/sudoers commands, nginx config, cron, PHP-FPM, Apache, or host-level services — read `.claude/memory/server-factbook.md` first. Check per-section TTLs; block as `status: stale` if relevant section is past its TTL. Skip factbook for pure UI/locale work.
+
+### Standard process
+
 1. Read tech-spec at `work/{feature}/tech-spec.md`
 2. Read user-spec at `work/{feature}/user-spec.md` for context
 3. Read project CLAUDE.md for code rules
 4. Read relevant memory files (architecture, payments, CJM)
 5. Run grep verifications for parallel plan
-6. Compile report
+6. **Scope completeness check** (added 2026-06-01): if tech-spec touches the server, enumerate explicitly which **classes** of services the factbook covers (docker / host-PHP / host-cron / host-systemd / nginx vhosts / managed-PaaS). If any class is silently absent → flag P1 with "scope incomplete: <class> not in factbook coverage".
+7. Compile report
 
 ## Output Format
 

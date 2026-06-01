@@ -307,6 +307,48 @@ After successful deploy and user smoke test:
 
 ---
 
+## Discovery-only epics — pipeline adaptations (added 2026-06-01)
+
+Not every epic deploys to PROD. Discovery epics (factbook collection, infra audit, dependency mapping) don't have a real deploy or marketing surface. The pipeline-state.yml format supports this pattern via:
+
+### Adaptations block
+
+Top-level `adaptations:` list documents what each step means in this epic's context. Example:
+
+```yaml
+adaptations:
+  - "Step 1 (DEV): treat as 'factbook collection + write' rather than tests/build"
+  - "Step 2 (STAGE deploy): collapse into 'cross-check + memory updates verification'"
+  - "Step 4 (Tester): adapted — verify changes applied, no leftovers"
+  - "Step 5 (PM): N/A — no CJM journey for documentation-only epic"
+  - "Step 6 (UX): N/A — no UI"
+  - "Steps 8-18 (PROD + GTM): SKIPPED — discovery epic"
+```
+
+### Skipped steps with `skip_reason`
+
+Each skipped step must have explicit `skip_reason` — not just absence. Scrum-master verifies all skipped steps have reasons:
+
+```yaml
+- id: 8
+  name: "PROD Deploy (skipped)"
+  status: skipped
+  skip_reason: "Discovery epic — no PROD deploy, all changes in workspace memory"
+```
+
+### Typical discovery-epic skip set
+
+- Steps 3, 6 (STAGE parser, UX): no parser, no UI.
+- Steps 5 (PM Stage review): N/A unless content produced.
+- Steps 8-18 (entire PROD + GTM): no deploy, no marketing.
+- Step 19 (retro): MANDATORY even for discovery — captures lessons from collection itself.
+
+### Active-session gate still applies if epic touches server
+
+Even discovery epics that SSH to the server should respect the rule. If discovery involves reading data from PROD DB or restarting any service for inspection — same session gate as deploy.
+
+---
+
 ## Rules
 
 - **NEVER `systemctl restart` on Code server** — only on Run
