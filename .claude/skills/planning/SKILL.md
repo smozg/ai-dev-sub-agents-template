@@ -32,6 +32,29 @@ Planning transforms an approved user-spec (WHAT) into a tech-spec (HOW). Two aut
    ```
    Tech-spec scope = derived from this enumeration, not "what I remember exists". This prevents hallucination-class findings (a real production system might exist on the host but be invisible to memory).
 
+## Phase 0.5: Epic split protocol (added from real-project retro 2026-06-01)
+
+When user-spec is the result of **splitting a previously-planned monolith** (e.g. one big epic was broken into smaller scoped sub-epics), there is a hazard of **losing findings** from the monolith planning phase. Each split-off finding may apply to a different sub-epic, but if not explicitly classified, it disappears — and re-emerges as a hotfix later.
+
+Mandatory steps before drafting tech-spec for a split-off epic:
+
+1. **Locate monolith findings.** The old monolith's `archive_v1_monolith/findings.yml` or `tech-spec`'s changelog/Risks.
+2. **Per-finding classification** with explicit decision:
+   - `addressed_in_<this_epic>` — covered by this epic's tech-spec (link section)
+   - `addressed_in_<other_epic>` — explicitly redirected to another split
+   - `deferred_to_<future_epic>` — added to BACKLOG
+   - `accepted_risk` — won't fix; document why
+3. **Write findings audit table** in tech-spec preamble:
+   ```markdown
+   ## Monolith findings carry-over
+   | Old ID | Summary | Decision | Where |
+   |---|---|---|---|
+   | F007 | Token scope `workflow` needed | addressed_in_this_epic | Decision 3 |
+   ```
+4. **Architect mandatory check** (per architect.md): verify monolith findings list is non-empty for split epics, and no item lacks classification.
+
+**Real example:** In a project's monolith r1, architect flagged "workflow scope insufficient". At split, this was reclassified as "next-epic manual user step". But mirror push **requires** workflow scope for history-with-workflow-files, not just for current edits. Same root cause reappeared mid-execution → token rotation hotfix. The lesson existed; the carry-over protocol didn't.
+
 ## Phase 1: Codebase Research
 
 Before writing the plan, understand the existing code:

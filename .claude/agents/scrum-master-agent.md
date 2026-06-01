@@ -194,7 +194,7 @@ Compute and report:
 | Epic class | Normal convergent range | `0` interpretation |
 |---|---|---|
 | Feature (UI + DB + API) | 1-3 | suspect if validators didn't deep-read |
-| Migration / monolith refactor | 2-5 | architectural surface = more convergence opportunities |
+| Migration / monolith refactor | 2-5 | architectural surface = more convergence opportunities; normal duration 2-4h; normal hotfix loops 0-1 |
 | Discovery (factbook collection, audit) | 0-1 | 0 is normal — narrow surface |
 | Ops/maintenance (rename, cleanup, mode-fix) | 0-1 | 0 is normal — no architecture in play |
 | Infrastructure (CI/CD, runner setup) | 1-2 | tooling-class convergence |

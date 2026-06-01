@@ -81,7 +81,10 @@ If tech-spec touches Docker services/stacks, Django models, SSH/sudoers commands
 4. Read relevant memory files (architecture, payments, CJM)
 5. Run grep verifications for parallel plan
 6. **Scope completeness check** (added 2026-06-01): if tech-spec touches the server, enumerate explicitly which **classes** of services the factbook covers (docker / host-PHP / host-cron / host-systemd / nginx vhosts / managed-PaaS). If any class is silently absent → flag P1 with "scope incomplete: <class> not in factbook coverage".
-7. Compile report
+7. **Push response parsing** (added 2026-06-01): if tech-spec includes `git push` to a public-facing host, flag that the executor must capture and parse the push response output. GitHub returns alerts in push output (e.g. dependabot vulnerabilities count). Easy to miss without explicit instruction to capture stderr.
+8. **Split-history findings audit** (added 2026-06-01): if user-spec mentions "split from monolith" or `archive_v1_monolith/`, verify tech-spec has the `## Monolith findings carry-over` table from `planning/SKILL.md` Phase 0.5. If absent or any row lacks explicit classification → flag P1.
+9. **Mirror push token scope** (added 2026-06-01): if tech-spec uses `git push --mirror`, verify Decision section includes token scope check covering ALL history, not just current touchable files. `repo` scope is insufficient when history contains workflow file commits — need `repo + workflow`. Check via `curl -I` with the token: `x-oauth-scopes` header.
+10. Compile report
 
 ## Output Format
 

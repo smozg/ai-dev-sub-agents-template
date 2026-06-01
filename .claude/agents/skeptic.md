@@ -39,6 +39,7 @@ For every claim in the tech-spec, verify:
 | **Config/env var** | `Grep` — is this variable used anywhere? |
 | **Callback name** | `Grep` in handlers — is this callback registered? |
 | **Markdown section reference** | Tech-spec says "add to `## XYZ` section" — `Grep "^## XYZ"` in target file. If section doesn't exist → flag as Mirage (CREATE section, don't append). |
+| **Token scope for `git push --mirror`** | Mirror push requires scope for ALL history, not just current changes. If repo history ever touched `.github/workflows/`, push --mirror needs `workflow` scope. Verify via `curl -I -H "Authorization: token $TOKEN" https://api.github.com/user` → header `x-oauth-scopes`. Required for GitHub: `repo, workflow`. If missing → flag as Mirage P0 (would block execution). |
 
 ## Process
 
